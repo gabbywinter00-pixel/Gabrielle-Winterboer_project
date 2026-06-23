@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KC Events</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet/dist/leaflet.css"
+    />
+
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<h1>Kansas City Events</h1>
+
+<form method="GET" action="/">
+    <label>Date:</label>
+    <input type="date" name="date" value="{{ selected_date }}">
+
+    <label>Starts after:</label>
+    <input type="time" name="time" value="{{ selected_time }}">
+
+    <button type="submit">Apply Filters</button>
+</form>
+
+<div id="map"></div>
+
+<p>Total events: {{ events|length }}</p>
+
+{% for event in events %}
+<div style="margin-bottom:10px;">
+    <strong>{{ event.name }}</strong><br>
+    {{ event.date }} at {{ event.time }}
+</div>
+{% endfor %}
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+var map = L.map('map').setView([39.0997, -94.5786], 11);
+
+L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        attribution: '&copy; OpenStreetMap contributors'
+    }
+).addTo(map);
+
+{% for event in events %}
+
+    {% if event.lat and event.lon %}
+
+    L.marker([
+        {{ event.lat }},
+        {{ event.lon }}
+    ])
+    .addTo(map)
+    .bindPopup(
+        "<b>{{ event.name }}</b><br>" +
+        "{{ event.date }}<br>" +
+        "{{ event.time }}"
+    );
+
+    {% endif %}
+
+{% endfor %}
+
+</script>
+
+</body>
+</html>
