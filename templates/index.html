@@ -20,14 +20,19 @@
 
 <body>
 
-<h1>Kansas City Events</h1>
+<h1>Events in your city</h1>
 
 <form method="GET" action="/">
+   
     <label>Date:</label>
     <input type="date" name="date" value="{{ selected_date }}">
 
     <label>Starts after:</label>
     <input type="time" name="time" value="{{ selected_time }}">
+
+   <label>City:</label>
+    <input type="text" name="city" placeholder="Enter city (e.g. Kansas City)">
+
 
     <button type="submit">Apply Filters</button>
 </form>
