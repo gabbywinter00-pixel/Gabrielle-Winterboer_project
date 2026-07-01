@@ -30,8 +30,10 @@
     <label>Starts after:</label>
     <input type="time" name="time" value="{{ selected_time }}">
 
-   <label>City:</label>
-    <input type="text" name="city" placeholder="Enter city (e.g. Kansas City)">
+   <form method="GET">
+    <input type="text" name="city" placeholder="Enter city">
+    <button type="submit">Search</button>
+   </form>
 
 
     <button type="submit">Apply Filters</button>
