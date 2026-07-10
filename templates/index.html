@@ -41,7 +41,8 @@
 {% for event in events %}
 <div style="margin-bottom:10px;">
     <strong>{{ event.name }}</strong><br>
-    {{ event.date }} at {{ event.time }}
+    {{ event.date }} at {{ event.time }} {{ event.classification }}
+
 </div>
 {% endfor %}
 
