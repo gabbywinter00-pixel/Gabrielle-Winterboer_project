@@ -22,7 +22,7 @@ def home():
 
         body {
             font-family: Impact, sans-serif;
-            background-color: #ffd2e1;
+            background-color: #d2f8ff;
             margin: 0;
             padding: 0;
 
