@@ -9,6 +9,7 @@ from asyncio import events
 
 from data import get_all_events
 
+
 @app.route("/")
 def home():
 
@@ -106,8 +107,19 @@ def home():
 
         <form action="/results/" method="GET">
    
-             <label>Date:</label>
-                <input type="date" name="date" value="{{ selected_date }}">
+              <label>From:</label>
+                <input 
+                type="date" 
+                name="start_date" 
+                value="{{ start_date }}"
+                >
+
+                <label>To:</label>
+                <input 
+                type="date" 
+                name="end_date" 
+                value="{{ end_date }}"
+                >
 
              <label>Starts after:</label>
              <input type="time" name="time" value="{{ selected_time }}">
@@ -131,11 +143,24 @@ def results():
 
     print("ROUTE HIT")
 
-    selected_date = request.args.get("date")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
     selected_time = request.args.get("time")
     selected_category = request.args.get("category")
 
-    data = get_all_events() # NEED STARTDT AND ENDDT PARAMETERS
+    # Create date range for Ticketmaster
+    startDT = None
+    endDT = None
+
+    if start_date:
+        startDT = f"{start_date}T00:00:00Z"
+    if end_date:
+        endDT = f"{end_date}T23:59:59Z"
+
+    data = get_all_events(startDT, endDT)
+
+    # Pull events
+    data = get_all_events(startDT, endDT) # NEED STARTDT AND ENDDT PARAMETERS
 
     # Apply remaining filters
     filtered = data
@@ -159,15 +184,7 @@ def results():
             filtered = filtered
 
 
-    # DATE FILTER
-    if selected_date:
-        try:
-            filtered = [
-                e for e in filtered
-                if e.get("date") == selected_date
-            ]
-        except:
-            filtered = filtered
+
 
     # Build final display list
     events = []
@@ -205,7 +222,8 @@ def results():
     return render_template(
         "index.html",
         events=events,
-        selected_date=selected_date,
+        start_date=start_date,
+        end_date=end_date,
         selected_time=selected_time
     )
 
