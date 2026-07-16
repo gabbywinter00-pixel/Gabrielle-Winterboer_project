@@ -1,30 +1,115 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>KC Events</title>
 
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet/dist/leaflet.css"
-    />
+<html> <head> <title>KC Events</title>
 
-    <style>
-        #map {
-            height: 600px;
-            width: 100%;
-            margin-bottom: 20px;
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
+
+<style>
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    h1 {
+        margin-bottom: 20px;
+    }
+
+    /* Filter Bar */
+    .filters {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    /* Main Layout */
+    .main-layout {
+        display: flex;
+        gap: 20px;
+    }
+
+    /* Map Section */
+    .map-container {
+        flex: 2;
+    }
+
+    #map {
+        height: 700px;
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    /* Results Section */
+    .results-container {
+        flex: 1;
+        max-height: 700px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .event-card {
+        padding: 12px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .event-card:last-child {
+        border-bottom: none;
+    }
+
+    .event-title {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .event-card {
+    padding: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: 0.2s;
+    }
+
+    .event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }   
+
+    /* Mobile Layout */
+    @media (max-width: 768px) {
+
+        .main-layout {
+            flex-direction: column;
         }
-    </style>
+
+        #map {
+            height: 400px;
+        }
+
+        .results-container {
+            max-height: none;
+        }
+    }
+
+</style>
 
 </head>
 
 <body>
 
-<h1>KC events</h1>
+<h1>KC Events</h1>
+
+<div class="filters">
 
 <form method="GET" action="/">
 
-        <!-- Category Filter -->
     <label for="category">Event Type:</label>
 
     <select name="category" id="category">
@@ -68,21 +153,63 @@
 
     </select>
 
-
     <button type="submit">Apply Filters</button>
+
 </form>
 
-<div id="map"></div>
+</div>
 
-<p>Total events: {{ events|length }}</p>
+<p><strong>Total events:</strong> {{ events|length }}</p>
 
-{% for event in events %}
-<div style="margin-bottom:10px;">
-    <strong>{{ event.name }}</strong><br>
-    {{ event.date }} at {{ event.time }} <br>   {{ event.classification }}
+<div class="main-layout">
+
+<!-- MAP -->
+<div class="map-container">
+    <div id="map"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-container">
+
+    <h2>Events</h2>
+
+    {% for event in events %}
+
+   <div
+    class="event-card"
+    onclick="focusMarker('{{ loop.index }}')">
+
+    <div class="event-title">
+        {{ event.name }}
+    </div>
+
+    <div>
+        {{ event.date }} at {{ event.time }}
+    </div>
+
+    <div>
+        {{ event.classification }}
+    </div>
+
+    {% if event.url %}
+    <p>
+        <a
+            href="{{ event.url }}"
+            target="_blank"
+            onclick="event.stopPropagation();"
+        >
+            Buy Tickets
+        </a>
+    </p>
+    {% endif %}
+
+    </div>
+
+    {% endfor %}
 
 </div>
-{% endfor %}
+
+</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -97,11 +224,13 @@ L.tileLayer(
     }
 ).addTo(map);
 
+var markers = {};
+
 {% for event in events %}
 
     {% if event.lat and event.lon %}
 
-    L.marker([
+    var marker{{ loop.index }} = L.marker([
         {{ event.lat }},
         {{ event.lon }}
     ])
@@ -112,11 +241,26 @@ L.tileLayer(
         "{{ event.time }}"
     );
 
+    markers["{{ loop.index }}"] = marker{{ loop.index }};
+
     {% endif %}
 
 {% endfor %}
 
-</script>
+function focusMarker(id) {
 
-</body>
-</html>
+    var marker = markers[id];
+
+    if (marker) {
+
+        map.setView(
+            marker.getLatLng(),
+            14
+        );
+
+        marker.openPopup();
+    }
+}
+
+</script>
+</body> </html>
