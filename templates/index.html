@@ -110,6 +110,11 @@
 
 <form method="GET" action="/results/">
 
+    <!-- Preserve current date/time filters so category changes don't drop the original date/time filtering -->
+    <input type="hidden" name="start_date" value="{{ start_date }}">
+    <input type="hidden" name="end_date" value="{{ end_date }}">
+    <input type="hidden" name="time" value="{{ selected_time }}">
+
     <label for="category">Event Type:</label>
 
     <select name="category" id="category">

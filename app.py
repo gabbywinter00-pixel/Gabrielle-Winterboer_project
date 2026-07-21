@@ -145,23 +145,51 @@ def results():
     selected_time = request.args.get("time")
     selected_category = request.args.get("category")
 
-    # Create date range for Ticketmaster
+    # Create date range for Ticketmaster (keeps existing API call behavior)
     startDT = f"{start_date}T00:00:00Z" if start_date else None
     endDT = f"{end_date}T23:59:59Z" if end_date else None
     
-    df = get_all_events(startDT, endDT)
+    # MASTER: original dataset (preserved)
+    master_df = get_all_events(startDT, endDT)
+    master_df = master_df.copy(deep=True)
 
-    # TIME FILTER
+    # Ensure we have dedicated datetime/time columns for filtering (keeps formatted display columns untouched)
+    if not master_df.empty:
+        master_df["date_dt"] = pd.to_datetime(master_df["date"], format="%m/%d/%Y", errors="coerce")
+        master_df["time_dt"] = pd.to_datetime(master_df["time"], format="%I:%M %p", errors="coerce").dt.time
+
+    # WORKING COPY: apply all UI filters to this copy only
+    df = master_df.copy()
+
+    # Apply date-range filters (based on the date inputs from the form: YYYY-MM-DD)
+    if start_date and not df.empty:
+        start_dt = pd.to_datetime(start_date, format="%Y-%m-%d", errors="coerce")
+        if pd.notna(start_dt):
+            df = df.loc[df["date_dt"].notna() & (df["date_dt"].dt.date >= start_dt.date())]
+
+    if end_date and not df.empty:
+        end_dt = pd.to_datetime(end_date, format="%Y-%m-%d", errors="coerce")
+        if pd.notna(end_dt):
+            df = df.loc[df["date_dt"].notna() & (df["date_dt"].dt.date <= end_dt.date())]
+
+    # TIME FILTER (compare against time_dt which is a time object)
     if selected_time and not df.empty:
         selected_time_obj = datetime.strptime(selected_time, "%H:%M").time()
-        df = df.loc[df["time"].notna() & (df["time"] >= selected_time_obj)]
+        df = df.loc[df["time_dt"].notna() & (df["time_dt"] >= selected_time_obj)]
 
     # CATEGORY FILTER
-    if selected_category and not df.empty:
+    # detect category-like column and normalize to 'class' for template compatibility
+    possible_cols = ["class", "classification", "category", "segment", "type"]
+    cat_col = next((c for c in possible_cols if c in df.columns), None)
+    if cat_col and cat_col != "class":
+        # rename in both master and working copies so templates can keep using row['class']
+        master_df = master_df.rename(columns={cat_col: "class"})
+        df = df.rename(columns={cat_col: "class"})
+    if selected_category and not df.empty and "class" in df.columns:
         df = df.loc[df["class"] == selected_category]
 
-    print("EVENT COUNT:", len(df))
-    
+    print("MASTER COUNT:", len(master_df), "FILTERED COUNT:", len(df))
+
     return render_template(
         "index.html",
         events=df,
