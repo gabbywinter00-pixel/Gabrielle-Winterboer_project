@@ -137,11 +137,11 @@
             Comedy
         </option>
 
-        <option value="Theater"
-        {% if selected_category == "Theater" %}
+        <option value="Arts & Theatre"
+        {% if selected_category == "Arts & Theatre" %}
             selected
         {% endif %}>
-            Theater
+            Arts & Theatre
         </option>
 
         <option value="Other"
@@ -169,32 +169,33 @@
 </div>
 
 <!-- RESULTS -->
+<!-- RESULTS -->
 <div class="results-container">
 
     <h2>Events</h2>
 
-    {% for event in events %}
+    {% for idx, row in events.iterrows() %}
 
    <div
     class="event-card"
     onclick="focusMarker('{{ loop.index }}')">
 
     <div class="event-title">
-        {{ event.name }}
+        {{ row['name'] }}
     </div>
 
     <div>
-        {{ event.date }} at {{ event.time }}
+        {{ row['date'] }} at {{ row['time'] }}
     </div>
 
     <div>
-        {{ event.classification }}
+        {{ row['class'] }}
     </div>
 
-    {% if event.url %}
+    {% if row['url'] %}
     <p>
         <a
-            href="{{ event.url }}"
+            href="{{ row['url'] }}"
             target="_blank"
             onclick="event.stopPropagation();"
         >
@@ -226,19 +227,19 @@ L.tileLayer(
 
 var markers = {};
 
-{% for event in events %}
+{% for idx, row in events.iterrows() %}
 
-    {% if event.lat and event.lon %}
+    {% if row['lat'] and row['lon'] %}
 
     var marker{{ loop.index }} = L.marker([
-        {{ event.lat }},
-        {{ event.lon }}
+        {{ row['lat'] }},
+        {{ row['lon'] }}
     ])
     .addTo(map)
     .bindPopup(
-        "<b>{{ event.name }}</b><br>" +
-        "{{ event.date }}<br>" +
-        "{{ event.time }}"
+        "<b>{{ row['name'] }}</b><br>" +
+        "{{ row['date'] }}<br>" +
+        "{{ row['time'] }}"
     );
 
     markers["{{ loop.index }}"] = marker{{ loop.index }};

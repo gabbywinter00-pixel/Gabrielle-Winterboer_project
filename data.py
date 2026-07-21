@@ -2,6 +2,7 @@
 from pkgutil import get_data
 
 import requests
+import pandas as pd
 from flask import Flask, render_template, request
 from keys import TICKETMASTER_KEY
 from datetime import datetime
@@ -88,9 +89,21 @@ def normalize_ticketmaster(data):
     return events
     
 
-
 def get_all_events(startDT=None, endDT=None):
     ticketmaster_data = get_ticketmaster_events(startDT, endDT)
-    return normalize_ticketmaster(ticketmaster_data)
+    events = normalize_ticketmaster(ticketmaster_data)
 
+    df = pd.DataFrame(events)
+
+    if not df.empty:
+        # Convert to datetime, then format as MM/DD/YYYY
+        df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%m/%d/%Y")
+        
+        # Convert to time, then format as HH:MM AM/PM
+        df["time"] = pd.to_datetime(df["time"], format="%H:%M", errors="coerce").dt.strftime("%I:%M %p")
+    
+    #print("DataFrame columns:", df.columns.tolist())
+    #print("First row:", df.iloc[0] if not df.empty else "No data")
+
+    return df
    

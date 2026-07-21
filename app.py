@@ -1,11 +1,10 @@
-#import flask, import API keys from keys.json, import requests
 import requests
+import pandas as pd
+from datetime import datetime
 from flask import Flask, render_template, request
 from keys import TICKETMASTER_KEY, EVENTBRITE_TOKEN
 
 app = Flask(__name__)
-
-from asyncio import events
 
 from data import get_all_events
 
@@ -141,93 +140,35 @@ def home():
 @app.route("/results/")
 def results():
 
-    print("ROUTE HIT")
-
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
     selected_time = request.args.get("time")
     selected_category = request.args.get("category")
 
     # Create date range for Ticketmaster
-    startDT = None
-    endDT = None
-
-    if start_date:
-        startDT = f"{start_date}T00:00:00Z"
-    if end_date:
-        endDT = f"{end_date}T23:59:59Z"
-
-    data = get_all_events(startDT, endDT)
-
-    # Pull events
-    data = get_all_events(startDT, endDT) # NEED STARTDT AND ENDDT PARAMETERS
-
-    # Apply remaining filters
-    filtered = data
-
-    from datetime import datetime
-
-    filtered = data
+    startDT = f"{start_date}T00:00:00Z" if start_date else None
+    endDT = f"{end_date}T23:59:59Z" if end_date else None
+    
+    df = get_all_events(startDT, endDT)
 
     # TIME FILTER
-    if selected_time:
-        try:
-            selected_time_obj = datetime.strptime(selected_time, "%H:%M").time()
+    if selected_time and not df.empty:
+        selected_time_obj = datetime.strptime(selected_time, "%H:%M").time()
+        df = df.loc[df["time"].notna() & (df["time"] >= selected_time_obj)]
 
-            filtered = [
-                e for e in filtered
-                if e.get("time")
-                and datetime.strptime(e["time"], "%H:%M").time() >= selected_time_obj
-            ]
+    # CATEGORY FILTER
+    if selected_category and not df.empty:
+        df = df.loc[df["class"] == selected_category]
 
-        except:
-            filtered = filtered
-
-
-
-
-    # Build final display list
-    events = []
-
-    for event in filtered:
-
-        display_time = "TBD"
-
-        if event.get("time"):
-            try:
-                display_time = datetime.strptime(
-                    event["time"],
-                    "%H:%M"
-                ).strftime("%I:%M %p")
-            except:
-                display_time = event["time"]
-
-        if selected_category:
-            filtered = [
-                e for e in filtered
-                if e.get("category") == selected_category]
-
-        events.append({
-            "name": event.get("name"),
-            "date": event.get("date"),
-            "time": display_time,
-            "source": event.get("source"),
-            "url": event.get("url"),
-            "lat": event.get("lat"),
-            "lon": event.get("lon"),
-            "classification": event.get("class"),
-        })
-
-    print("EVENT COUNT:", len(events))
+    print("EVENT COUNT:", len(df))
     
     return render_template(
         "index.html",
-        events=events,
+        events=df,
         start_date=start_date,
         end_date=end_date,
         selected_time=selected_time,
         selected_category=selected_category
-
     )
 
 #run Flask app
