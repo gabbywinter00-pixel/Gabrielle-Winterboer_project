@@ -1,4 +1,6 @@
 #import flask, import API keys from keys.json, import requests
+from pkgutil import get_data
+
 import requests
 from flask import Flask, render_template, request
 from keys import TICKETMASTER_KEY
@@ -76,6 +78,7 @@ def normalize_ticketmaster(data):
                 "date": start.get("localDate"),
                 "time": time,
                 "source": "ticketmaster",
+                "url": event.get("url"),
                 "lat": venue.get("location", {}).get("latitude"),
                 "lon": venue.get("location", {}).get("longitude"),
                 "city": venue.get("city", {}).get("name"),

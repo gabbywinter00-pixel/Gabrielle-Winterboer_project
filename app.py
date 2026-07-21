@@ -212,6 +212,7 @@ def results():
             "date": event.get("date"),
             "time": display_time,
             "source": event.get("source"),
+            "url": event.get("url"),
             "lat": event.get("lat"),
             "lon": event.get("lon"),
             "classification": event.get("class"),
@@ -224,7 +225,9 @@ def results():
         events=events,
         start_date=start_date,
         end_date=end_date,
-        selected_time=selected_time
+        selected_time=selected_time,
+        selected_category=selected_category
+
     )
 
 #run Flask app
