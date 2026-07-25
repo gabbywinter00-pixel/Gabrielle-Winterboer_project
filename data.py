@@ -17,7 +17,7 @@ def get_ticketmaster_events(startDT, endDT):
         "apikey": TICKETMASTER_KEY,
         "city": "Kansas City",
         "countryCode": "US",
-        "size": 50
+        "size": 100,
     }
 
     if startDT:
@@ -63,7 +63,7 @@ def normalize_ticketmaster(data):
 
             # NORMALIZE CATEGORY NAMES
             if category == "Arts & Theatre":
-                category = "Theater"
+                category = "Arts & Theatre"
             # Convert explicit 'Undefined' values to Other
             elif category == "Undefined":
                 category = "Other"
@@ -71,7 +71,7 @@ def normalize_ticketmaster(data):
             elif category not in [
                 "Music",
                 "Sports",
-                "Theater",
+                "Arts & Theatre",
                 "Comedy",
                 "Other"
             ]:
