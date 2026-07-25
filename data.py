@@ -106,8 +106,7 @@ def get_all_events(startDT=None, endDT=None):
         # Convert to time, then format as HH:MM AM/PM
         df["time"] = pd.to_datetime(df["time"], format="%H:%M", errors="coerce").dt.strftime("%I:%M %p")
     
-    #print("DataFrame columns:", df.columns.tolist())
-    #print("First row:", df.iloc[0] if not df.empty else "No data")
+    
 
     return df
    
