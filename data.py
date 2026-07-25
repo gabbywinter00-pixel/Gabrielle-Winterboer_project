@@ -64,15 +64,18 @@ def normalize_ticketmaster(data):
             # NORMALIZE CATEGORY NAMES
             if category == "Arts & Theatre":
                 category = "Theater"
+            # Convert explicit 'Undefined' values to Other
+            elif category == "Undefined":
+                category = "Other"
 
             elif category not in [
                 "Music",
                 "Sports",
                 "Theater",
-                "Comedy"
+                "Comedy",
+                "Other"
             ]:
                 category = "Other"
-        
 
             events.append({
                 "name": event.get("name"),
@@ -83,7 +86,8 @@ def normalize_ticketmaster(data):
                 "lat": venue.get("location", {}).get("latitude"),
                 "lon": venue.get("location", {}).get("longitude"),
                 "city": venue.get("city", {}).get("name"),
-                "class": event["classifications"][0]["segment"]["name"]
+                # store the normalized category so templates and filters align
+                "class": category
             })
 
     return events
