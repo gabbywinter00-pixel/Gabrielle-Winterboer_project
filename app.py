@@ -188,6 +188,12 @@ def results():
     if selected_category and not df.empty and "class" in df.columns:
         df = df.loc[df["class"] == selected_category]
 
+    if not df.empty and "date_dt" in df.columns:
+        sort_columns = ["date_dt"]
+        if "time_dt" in df.columns:
+            sort_columns.append("time_dt")
+        df = df.sort_values(by=sort_columns, ascending=True)
+
     print("MASTER COUNT:", len(master_df), "FILTERED COUNT:", len(df))
 
     return render_template(
