@@ -1,18 +1,18 @@
 import requests
-import pandas as pd
-from datetime import datetime
+import pandas as pd #the data relies on pandas, make sure to install it
+from datetime import datetime #import datetime to normalize the time for date filtering
 from flask import Flask, render_template, request
-from keys import TICKETMASTER_KEY, EVENTBRITE_TOKEN
+from keys import TICKETMASTER_KEY #create a key.py file with your ticketmaster API key in it, so you can import it here. 
 
 app = Flask(__name__)
 
-from data import get_all_events
+from data import get_all_events #this imports the get_all_events function from data.py, which is used to retrieve and normalize event data from Ticketmaster.
 
 
 @app.route("/")
 def home():
-
-    html = """
+ #Below runs the HTML for the home page, and includes the first form for user input
+    html = """ 
     <html>
 
 <head>
@@ -139,7 +139,7 @@ def home():
   
 @app.route("/results/")
 def results():
-
+    # Get query parameters from the request
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
     selected_time = request.args.get("time")
@@ -194,9 +194,10 @@ def results():
             sort_columns.append("time_dt")
         df = df.sort_values(by=sort_columns, ascending=True)
 
-    print("MASTER COUNT:", len(master_df), "FILTERED COUNT:", len(df))
+    print("MASTER COUNT:", len(master_df), "FILTERED COUNT:", len(df)) #test print to see how many events are in the master dataset vs. the filtered dataset
 
-    return render_template(
+    # Render the results template with the filtered DataFrame and the original query parameters
+    return render_template( 
         "index.html",
         events=df,
         start_date=start_date,
